@@ -24,7 +24,7 @@ use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken;
 use Symfony\Component\HttpFoundation\Response;
 use Gesdinet\JWTRefreshTokenBundle\Security\Provider\RefreshTokenProvider;
 
@@ -33,7 +33,7 @@ trigger_deprecation('gesdinet/jwt-refresh-token-bundle', '1.0', 'The "%s" class 
 /**
  * @deprecated use the `refresh_jwt` authenticator instead
  */
-class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
+class RefreshTokenAuthenticator
 {
     private UserCheckerInterface $userChecker;
 
@@ -63,6 +63,15 @@ class RefreshTokenAuthenticator extends AbstractGuardAuthenticator
     public function supports(Request $request)
     {
         return null !== $this->extractor->getRefreshToken($request, $this->tokenParameterName);
+    }
+
+    public function createAuthenticatedToken(UserInterface $user, string $providerKey)
+    {
+        return new PostAuthenticationToken(
+            $user,
+            $providerKey,
+            $user->getRoles()
+        );
     }
 
     /**
